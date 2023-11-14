@@ -20,13 +20,15 @@
 #    Configuration
 # ===================
 ### Prerequisites ###
-# Tun2socks
-# Obtain tun2socks from https://github.com/xjasonlyu/tun2socks/releases/ (probably you need tun2socks-linux-amd64.zip)
 
 # Living Off the Foreign Land scripts
 git clone https://github.com/bitsadmin/lofl.git
 cd lofl
 
+# Tun2socks
+# Obtain tun2socks from https://github.com/xjasonlyu/tun2socks/releases/ (probably you need tun2socks-linux-amd64.zip)
+wget https://github.com/xjasonlyu/tun2socks/releases/download/v2.5.2/tun2socks-linux-amd64.zip
+unzip tun2socks-linux-amd64.zip
 
 ### Network ###
 # Create tunnel interface
@@ -37,11 +39,11 @@ cd lofl
 ./iptables_nat.sh -f ens36 tun1
 
 # Configure routes
-ip route add 10.0.0.0/16 via 198.18.0.1 dev tun1
+ip link set tun1 up
+ip route add 10.0.0.0/8 via 198.18.0.1 dev tun1
 
 # Tun2socks
-tun2socks-linux-amd64 -device tun1 -proxy socks4://127.0.0.1:1080
-
+./tun2socks-linux-amd64 -device tun1 -proxy socks5://127.0.0.1:8080
 
 ### Dnsmasq ###
 # Install
@@ -69,15 +71,17 @@ systemctl restart dnsmasq
 ### DNS ###
 # Configure nameserver
 echo nameserver 127.0.0.1 > /etc/resolv.conf
-chattr +i /etc/resolv.conf
+chattr -f +i /etc/resolv.conf
 
 # DNS over TCP
+apt install python3-dnslib
 ./dns_over_tcp.py
 
 
 ### CLDAP ###
+apt install socat
+ssh -N -L 127.0.0.1:8080:127.0.0.1:52001 USER@SERVER
 ./cldaproxy.sh victim.local
-
 
 # ===================
 #     Validation
