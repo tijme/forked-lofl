@@ -1,0 +1,4 @@
+- name: Deploy router
+  hosts: all
+  roles:
+    - role: router

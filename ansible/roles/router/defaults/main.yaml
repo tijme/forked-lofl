@@ -1,0 +1,9 @@
+lofl_dir: /opt/lofl
+tun2socks_version: 2.5.2
+tun2socks_dir: /opt/tun2socks
+tunnel_name: tun1
+tunnel_ip: 198.18.0.1
+tunnel_subnet: "{{ tunnel_ip }}/15"
+username: root
+proxy: socks5://127.0.0.1:8080
+default_dns: 8.8.8.8

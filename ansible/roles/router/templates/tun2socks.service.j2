@@ -1,0 +1,14 @@
+[Unit]
+Description=Tun2Socks
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User={{ username }}
+ExecStart={{ tun2socks_dir }}/tun2socks-linux-amd64 -device {{ tunnel_name }} -proxy {{ proxy }}
+
+[Install]
+WantedBy=multi-user.target

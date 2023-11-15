@@ -1,0 +1,14 @@
+[Unit]
+Description=CLDAProxy
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User={{ username }}
+ExecStart=bash {{ lofl_dir }}/cldaproxy.sh {{ victim_domains | first }}
+
+[Install]
+WantedBy=multi-user.target
