@@ -1,0 +1,11 @@
+# Port
+port=5353
+
+# Victim network DNS server
+{% for victim_domain in victim_domains %}
+server=/{{ victim_domain }}/{{ victim_dns }}
+{% endfor %}
+server=/{{ victim_dns }}.in-addr.arpa/{{ victim_dns }}
+
+# Default DNS server
+server={{ default_dns }}

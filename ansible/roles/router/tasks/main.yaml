@@ -1,0 +1,90 @@
+- name: Install necessary apps
+  package:
+    name: "{{item}}"
+    state: present
+  loop:
+    - unzip
+    - dnsmasq
+    - iptables
+    - python3
+    - python3-dnslib
+    - socat
+- name: Copy lofl
+  synchronize:
+    src: ../../../
+    dest: "{{ lofl_dir }}/"
+- name: Install tun2socks
+  block:
+    - name: Download tun2socks
+      get_url:
+        url: https://github.com/xjasonlyu/tun2socks/releases/download/v{{ tun2socks_version }}/tun2socks-linux-amd64.zip
+        dest: /opt/tun2socks.zip
+    - name: Create tun2socks dir
+      file:
+        path: "{{ tun2socks_dir }}"
+        state: directory
+    - name: Install tun2socks
+      unarchive:
+        src: /opt/tun2socks.zip
+        dest: "{{ tun2socks_dir }}"
+        remote_src: yes
+# TODO I couldn't find ansible commands to create network interfaces, but if such a command exists, use it instead
+- name: Create tunnel interface
+  command:
+    cmd: bash ./create_tun.sh {{ tunnel_name }} {{ tunnel_subnet }}
+    chdir: "{{ lofl_dir }}"
+  ignore_errors: true
+- name: Configure NAT
+  include_tasks: configure_nat.yaml
+  loop:
+    - tun1
+- name: Install tun2socks systemd service
+  template:
+    src: "../templates/tun2socks.service.j2"
+    dest: "/etc/systemd/system/tun2socks.service"
+- name: Start and enable tun2socks service
+  systemd:
+    daemon_reload: true
+    enabled: true
+    name: tun2socks
+    state: restarted
+- name: Start tunnel interface
+  command: ip link set {{ tunnel_name }} up
+- name: Add routes
+  command: ip route replace {{item}} via {{ tunnel_ip }} dev {{ tunnel_name }}
+  loop: "{{ routes }}"
+- name: Install DNSMasq config
+  template:
+    src: "../templates/dnsmasq.conf.j2"
+    dest: "/etc/dnsmasq.conf"
+- name: Restart DNSMasq
+  systemd:
+    state: restarted
+    name: dnsmasq
+- name: Install dns_over_tcp systemd service
+  template:
+    src: "../templates/dns_over_tcp.service.j2"
+    dest: "/etc/systemd/system/dns_over_tcp.service"
+- name: Start and enable dns_over_tcp service
+  systemd:
+    daemon_reload: true
+    enabled: true
+    name: dns_over_tcp
+    state: restarted
+- name: Configure nameserver
+  copy:
+    src: "../templates/resolv.conf"
+    dest: "/etc/resolv.conf"
+    attributes: +i
+- name: Install cldaproxy systemd service
+  template:
+    src: "../templates/cldaproxy.service.j2"
+    dest: "/etc/systemd/system/cldaproxy.service"
+- name: Start and enable cldaproxy service
+  systemd:
+    daemon_reload: true
+    enabled: true
+    name: cldaproxy
+    state: restarted
+- name: Enable IP forwarding
+  shell: echo 1 > /proc/sys/net/ipv4/ip_forward

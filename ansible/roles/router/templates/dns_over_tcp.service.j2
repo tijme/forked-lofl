@@ -1,0 +1,14 @@
+[Unit]
+Description=DNS over TCP
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User={{ username }}
+ExecStart=python3 {{ lofl_dir }}/dns_over_tcp.py
+
+[Install]
+WantedBy=multi-user.target

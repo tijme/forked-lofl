@@ -1,0 +1,20 @@
+- name: masquerade
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    out_interface: "{{item}}"
+    jump: MASQUERADE
+- name: Accept return traffic
+  iptables:
+    chain: FORWARD
+    in_interface: "{{item}}"
+    out_interface: "{{ network_interface }}"
+    match: state
+    ctstate: RELATED,ESTABLISHED
+    jump: ACCEPT
+- name: Accept forward traffic
+  iptables:
+    chain: FORWARD
+    in_interface: "{{ network_interface }}"
+    out_interface: "{{ item }}"
+    jump: ACCEPT
