@@ -38,6 +38,9 @@ unzip tun2socks-linux-amd64.zip
 ./iptables_nat.sh -f ens36 ens33
 ./iptables_nat.sh -f ens36 tun1
 
+# Forwarding
+sysctl -w net.ipv4.ip_forward=1
+
 # Configure routes
 ip link set tun1 up
 ip route add 10.0.0.0/8 via 198.18.0.1 dev tun1
