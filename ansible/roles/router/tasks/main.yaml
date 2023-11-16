@@ -1,15 +1,14 @@
 - name: Install necessary apps
   package:
-    name: "{{item}}"
+    name:
+      - unzip
+      - dnsmasq
+      - iptables
+      - python3
+      - python3-dnslib
+      - socat
+      - rsync
     state: present
-  loop:
-    - unzip
-    - dnsmasq
-    - iptables
-    - python3
-    - python3-dnslib
-    - socat
-    - rsync
 - name: Copy lofl
   synchronize:
     src: ../../../../
