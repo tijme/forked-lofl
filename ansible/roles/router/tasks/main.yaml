@@ -9,9 +9,10 @@
     - python3
     - python3-dnslib
     - socat
+    - rsync
 - name: Copy lofl
   synchronize:
-    src: ../../../
+    src: ../../../../
     dest: "{{ lofl_dir }}/"
 - name: Install tun2socks
   block:
