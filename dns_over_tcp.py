@@ -23,6 +23,7 @@ except ImportError:
 dns_server = ('127.0.0.1', 5353)
 whitelist = []
 verbose = False
+bind_ip = '127.0.0.1'
 
 
 def socket_receive(sock, num_octets):
@@ -210,14 +211,14 @@ def main(args):
     
     # DNS UDP to TCP forwarder
     print('[+] Starting DNS UDP to TCP forwarder on port 53/UDP')
-    udp_to_tcp_forwarder = socketserver.ThreadingUDPServer(('', 53), UDPToTCPForwarder)
+    udp_to_tcp_forwarder = socketserver.ThreadingUDPServer((bind_ip, 53), UDPToTCPForwarder)
     dns_thread = threading.Thread(target=udp_to_tcp_forwarder.serve_forever)
     dns_thread.daemon = True
     dns_thread.start()
 
     # TCP forwarder
     print('[+] Starting DNS TCP forwarder on port 53/TCP')
-    tcp_forwarder = socketserver.ThreadingTCPServer(('', 53), TCPForwarder)
+    tcp_forwarder = socketserver.ThreadingTCPServer((bind_ip, 53), TCPForwarder)
     tcp_thread = threading.Thread(target=tcp_forwarder.serve_forever)
     tcp_thread.daemon = True
     tcp_thread.start()
